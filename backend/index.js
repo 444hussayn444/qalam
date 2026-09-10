@@ -27,6 +27,7 @@ logGoogleOAuthConfig();
 const app = express();
 const port = process.env.PORT || 5000;
 
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 // Trust the reverse proxy used by Velixir
 app.set("trust proxy", 1);
 
