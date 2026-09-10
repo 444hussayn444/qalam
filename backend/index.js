@@ -1,4 +1,3 @@
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -75,6 +74,9 @@ const limiter = rateLimit({
 // Apply rate limiting to API routes
 app.use("/api/", limiter);
 
+app.get("/", (req, res) => {
+  res.send("Hello World HAHA");
+});
 // Stricter rate limit for authentication routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

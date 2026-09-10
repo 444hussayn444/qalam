@@ -1,5 +1,5 @@
 const API_URL =
-  process.env.REACT_APP_API_URL || "https://qalam.velixir.run/api/v1";
+  process.env.REACT_APP_API_URL || "https://qalam-backend.444hussayn444.deno.net";
 const API_BASE_URL = API_URL.replace(/\/api\/v1\/?$/, "");
 const config = { API_BASE_URL, API_URL };
 
