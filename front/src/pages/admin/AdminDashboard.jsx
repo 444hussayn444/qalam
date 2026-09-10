@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { showSuccess, showError } from "../../utils/toast";
 import { API_BASE_URL } from "../../config/config";
@@ -17,7 +17,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const authFailureHandled = useRef(false);
-  const errorToastShown = useRef(false);
   const [deletingId, setDeletingId] = useState(null);
   const [editingDesign, setEditingDesign] = useState(null);
   const [managedCollection, setManagedCollection] = useState(null);
@@ -45,6 +44,131 @@ export default function AdminDashboard() {
     image: null,
   });
 
+  const authFetch = useCallback(
+    async (url, options = {}) => {
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        if (!authFailureHandled.current) {
+          authFailureHandled.current = true;
+          navigate("/admin-46ab702136bc4b229f8b10e8c2997fa4", {
+            replace: true,
+          });
+        }
+        return null;
+      }
+
+      const headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+      };
+
+      try {
+        const response = await fetch(url, { ...options, headers });
+        if (!response.ok) {
+          const data = await response
+            .json()
+            .catch(() => ({ message: response.statusText }));
+          if (response.status === 401 || response.status === 403) {
+            if (!authFailureHandled.current) {
+              authFailureHandled.current = true;
+              localStorage.removeItem("adminToken");
+              localStorage.removeItem("adminUser");
+              navigate("/admin-46ab702136bc4b229f8b10e8c2997fa4", {
+                replace: true,
+              });
+            }
+          } else {
+            showError(data.message || "An unknown error occurred.");
+          }
+          return null;
+        }
+        return response;
+      } catch (error) {
+        if (!authFailureHandled.current) {
+          showError("A network error occurred. Please check your connection.");
+        }
+        return null;
+      }
+    },
+    [navigate],
+  );
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await authFetch(
+        `${API_BASE_URL}/api/v1/admin/categories`,
+      );
+      if (!response) return [];
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setCategories(data.data);
+        return data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }, [authFetch]);
+
+  const fetchCollections = useCallback(async () => {
+    try {
+      const response = await authFetch(
+        `${API_BASE_URL}/api/v1/admin/collections`,
+      );
+      if (!response) return [];
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setCollections(data.data);
+        return data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }, [authFetch]);
+
+  const fetchDesigns = useCallback(async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/admin/designs`);
+      if (!response) return [];
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setDesigns(data.data);
+        return data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }, [authFetch]);
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const response = await authFetch(
+        `${API_BASE_URL}/api/v1/admin/customers`,
+      );
+      if (!response) return;
+      const data = await response.json();
+      if (data.success) setCustomers(data.data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [authFetch]);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/admin/orders`);
+      if (!response) return;
+      const data = await response.json();
+      if (data.success) setOrders(data.orders || []);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [authFetch]);
+
   useEffect(() => {
     if (!localStorage.getItem("adminToken")) {
       navigate("/admin-46ab702136bc4b229f8b10e8c2997fa4", { replace: true });
@@ -70,127 +194,14 @@ export default function AdminDashboard() {
     };
 
     fetchInitialData();
-  }, [navigate]);
-
-  const authFetch = async (url, options = {}) => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      if (!authFailureHandled.current) {
-        authFailureHandled.current = true;
-        navigate("/admin-46ab702136bc4b229f8b10e8c2997fa4", { replace: true });
-      }
-      return null;
-    }
-
-    const headers = {
-      ...options.headers,
-      Authorization: `Bearer ${token}`,
-    };
-
-    try {
-      const response = await fetch(url, { ...options, headers });
-      if (!response.ok) {
-        const data = await response
-          .json()
-          .catch(() => ({ message: response.statusText }));
-        if (response.status === 401 || response.status === 403) {
-          if (!authFailureHandled.current) {
-            authFailureHandled.current = true;
-            localStorage.removeItem("adminToken");
-            localStorage.removeItem("adminUser");
-            navigate("/admin-46ab702136bc4b229f8b10e8c2997fa4", {
-              replace: true,
-            });
-          }
-        } else {
-          showError(data.message || "An unknown error occurred.");
-        }
-        return null;
-      }
-      return response;
-    } catch (error) {
-      if (!authFailureHandled.current) {
-        showError("A network error occurred. Please check your connection.");
-      }
-      return null;
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await authFetch(
-        `${API_BASE_URL}/api/v1/admin/categories`,
-      );
-      if (!response) return [];
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        setCategories(data.data);
-        return data.data;
-      }
-      return [];
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
-
-  const fetchCollections = async () => {
-    try {
-      const response = await authFetch(
-        `${API_BASE_URL}/api/v1/admin/collections`,
-      );
-      if (!response) return [];
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        setCollections(data.data);
-        return data.data;
-      }
-      return [];
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
-
-  const fetchDesigns = async () => {
-    try {
-      const response = await authFetch(`${API_BASE_URL}/api/v1/admin/designs`);
-      if (!response) return [];
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        setDesigns(data.data);
-        return data.data;
-      }
-      return [];
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
-
-  const fetchCustomers = async () => {
-    try {
-      const response = await authFetch(
-        `${API_BASE_URL}/api/v1/admin/customers`,
-      );
-      if (!response) return;
-      const data = await response.json();
-      if (data.success) setCustomers(data.data || []);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const response = await authFetch(`${API_BASE_URL}/api/v1/admin/orders`);
-      if (!response) return;
-      const data = await response.json();
-      if (data.success) setOrders(data.orders || []);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  }, [
+    navigate,
+    fetchCategories,
+    fetchCollections,
+    fetchDesigns,
+    fetchCustomers,
+    fetchOrders,
+  ]);
 
   const fetchOrderDetails = async (orderId) => {
     try {

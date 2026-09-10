@@ -5,8 +5,6 @@ import { lazy, Suspense } from "react";
 import Navbar from "./Compoments/Navbar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 // Lazy load all pages
 const Home = lazy(() => import("./pages/home/Home"));
 const Store = lazy(() => import("./pages/store/Store"));
@@ -42,8 +40,6 @@ const Loading = () => (
 );
 
 function App() {
-  const navigate = useNavigate();
-
   return (
     <>
       <div id="blur-overlay"></div>
