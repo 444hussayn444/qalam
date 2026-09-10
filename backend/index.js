@@ -1,3 +1,4 @@
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -12,7 +13,7 @@ import cart_router from "./routes/cart_routes.js";
 import payment_router from "./routes/payment_routes.js";
 import { paypal_webhook } from "./controllers/paypal_controllers.js";
 import { logGoogleOAuthConfig } from "./controllers/google_auth_controllers.js";
-
+import db_connection from "./db/db.js";
 // to create the __dirname property .***.***.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,9 @@ logGoogleOAuthConfig();
 // starting and initialising the server .***.***.
 const app = express();
 const port = process.env.PORT || 5000;
+
+// Trust the reverse proxy used by Velixir
+app.set("trust proxy", 1);
 
 // .***.***. SECURITY MIDDLEWARE .***.***. //
 // Helmet for security headers
@@ -61,8 +65,8 @@ app.use(
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -74,7 +78,7 @@ app.use("/api/", limiter);
 // Stricter rate limit for authentication routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5, // 5 attempts per 15 minutes
+  max: 5,
   message: "Too many authentication attempts, please try again later.",
 });
 
@@ -87,25 +91,55 @@ app.post(
   express.raw({ type: "application/json" }),
   paypal_webhook,
 );
+
 app.post(
   "/api/v1/payment/webhook",
   express.raw({ type: "application/json" }),
   paypal_webhook,
 );
-app.use(express.json()); // for sending json and receiving .***.***.
-app.use("/assets", express.static(path.join(__dirname, "assets"))); // to accept all folders and have access form assets .***.***.
 
+app.use(express.json());
+app.use("/assets", express.static(path.join(__dirname, "assets")));
+
+// Temporary MongoDB health check
+app.get("/api/v1/health/db", async (req, res) => {
+  try {
+    const connection = await db_connection();
+
+    await connection.connection.db.admin().ping();
+
+    res.status(200).json({
+      success: true,
+      mongodb: "connected",
+    });
+  } catch (error) {
+    console.error("MongoDB health check failed:", {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      codeName: error.codeName,
+    });
+
+    res.status(503).json({
+      success: false,
+      mongodb: "disconnected",
+      error: error.name,
+      message: error.message,
+    });
+  }
+});
 // .***.***. APIS_MANAGER .***.***. //
-app.use("/api/v1", s_router); // for the store .***.***.
-app.use("/api/v1/", a_router); // for authantication .***.***.
-app.use("/api/v1/admin", admin_router); // for admin .***.***.
-app.use("/api/v1", cart_router); // for cart .***.***.
-app.use("/api/v1/payment", payment_router); // for payment .***.***.
+app.use("/api/v1", s_router);
+app.use("/api/v1/", a_router);
+app.use("/api/v1/admin", admin_router);
+app.use("/api/v1", cart_router);
+app.use("/api/v1/payment", payment_router);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.status || err.statusCode || 500;
+
   res.status(status).json({
     success: false,
     message: err.message || "Something went wrong!",

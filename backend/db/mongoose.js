@@ -9,11 +9,20 @@ let connectionPromise;
 
 export default function db_connection() {
   if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI is required");
+  console.log("[MongoDB] URI exists:", !!process.env.MONGODB_URI);
+  console.log(
+    "[MongoDB] URI host:",
+    process.env.MONGODB_URI
+      ? new URL(process.env.MONGODB_URI).hostname
+      : "MISSING",
+  );
+  console.log("[MongoDB] DB name:", process.env.MONGODB_DB_NAME || "qalam");
   if (!connectionPromise)
     connectionPromise = mongoose
       .connect(process.env.MONGODB_URI, {
         dbName: process.env.MONGODB_DB_NAME || "qalam",
-        serverSelectionTimeoutMS: 10000,
+        serverSelectionTimeoutMS: 30000,
+        family: 4,
       })
       .then(async (connection) => {
         try {
