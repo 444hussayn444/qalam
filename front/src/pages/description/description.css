@@ -1,0 +1,188 @@
+/* Import a clean modern font if you don't have one globally set, 
+   otherwise remove this line */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+:root {
+    --bg-color: #000000;
+    --card-bg: #0a0a0a;
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+    --border-color: #333333;
+    --accent-hover: #ffffff;
+}
+
+.description-page {
+    /* Layout */
+    min-height: 100vh;
+    width: 100%;
+    padding: 60px 40px;
+    box-sizing: border-box;
+
+    /* Theme */
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Positioning - kept relative to flow naturally, 
+     change to absolute/right:0 if you specifically need a sidebar */
+    position: relative;
+}
+
+/* Header Section */
+.description-header {
+    margin-bottom: 60px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.description-header h1 {
+    font-size: 4rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-top: 10px;
+    font-weight: 300;
+}
+
+/* Main Grid Layout */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Column Styles */
+.info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.section-title {
+    font-size: 3.5rem;
+    margin: 0;
+    padding-left: 15px;
+    border-left: 2px solid var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* List Styles */
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-list li {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    /* Subtle curve, not full pill */
+    font-size: 1.55rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Modern Hover Effect: Glow and Lift */
+.info-list li:hover {
+    border-color: var(--accent-hover);
+    color: var(--text-primary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+}
+
+/* Specific Styles for Contact Details */
+.contact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-item .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #666;
+}
+
+.contact-item .value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .description-page {
+        padding: 30px 20px;
+    }
+
+    .description-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 60px;
+    }
+}
+
+.description-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.description-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sections-vertical .info-column {
+    margin-bottom: 40px;
+    /* space between sections */
+}
+
+.section-title {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.info-list li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.contact-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.lang-switch {
+    margin-top: 15px;
+    padding: 6px 14px;
+    cursor: pointer;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}

@@ -1,0 +1,38 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Theme Variables */
+body[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --card-bg: #1a1a1a;
+  --border-color: #333333;
+  --input-bg: #2a2a2a;
+  --input-border: #444444;
+}
+
+body {
+  background-size: cover;
+  background-color: var(--bg-primary, #000000);
+  color: var(--text-primary, #ffffff);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Apply theme to all common page containers */
+body[data-theme="dark"] h1,
+body[data-theme="dark"] h2,
+body[data-theme="dark"] h3,
+body[data-theme="dark"] h4,
+body[data-theme="dark"] h5,
+body[data-theme="dark"] h6,
+body[data-theme="dark"] p,
+body[data-theme="dark"] span,
+body[data-theme="dark"] div {
+  color: var(--text-primary);
+}
